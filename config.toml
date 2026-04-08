@@ -1,4 +1,0 @@
-log_level = "info"
-
-[schematics]
-example = { path = "./schematics/example" }

@@ -1562,7 +1562,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "template-renderer"
+name = "template-renderer-rs"
 version = "0.1.0"
 dependencies = [
  "clap",

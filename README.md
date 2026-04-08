@@ -1,6 +1,6 @@
-# template-renderer
+# template-renderer-rs
 
-`template-renderer` is a small Rust CLI for generating project files from reusable schematics. A schematic is a directory of template files plus an optional `schema.json` that defines the questions to ask before rendering.
+`template-renderer-rs` is a small Rust CLI for generating project files from reusable schematics. A schematic is a directory of template files plus an optional `schema.json` that defines the questions to ask before rendering.
 
 The tool renders both file contents and file names with [Handlebars](https://handlebarsjs.com/), so placeholders like `{{projectName}}` can appear inside files and in paths such as `{{file}}.js`.
 

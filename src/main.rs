@@ -1,12 +1,8 @@
 mod core;
 use core::{cli, load_config};
 
-fn main() {
-    let mut config = load_config().unwrap_or_else(|err| {
-        eprintln!("Failed to load config: {}", err);
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut config = load_config().map_err(|err| format!("Failed to load config: {}", err))?;
 
-        std::process::exit(1);
-    });
-
-    let _ = cli(&mut config);
+    cli(&mut config)
 }

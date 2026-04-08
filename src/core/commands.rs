@@ -1,14 +1,15 @@
-use crate::core::count_dir_files;
+use crate::core::count_dir_files_except;
 
 use super::{
     Config, RemoteSchematic, Schematic, SchematicDetail, handle_inputs, read_schema,
     render_template_dir, save_config,
 };
 use indicatif::ProgressBar;
-use serde_json::Value;
+use serde_json::{Map, Value};
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 pub fn show_schematics(
     schematics: &BTreeMap<String, Schematic>,
@@ -64,37 +65,44 @@ fn render_schematic(
     src: &str,
     destination: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let inputs = match handle_inputs(&schema_json) {
-        Ok(data) => data,
-        Err(e) => match e {
-            super::InputError::DialoguerError(err) => {
-                return Err(format!("Dialoguer error: {}", err).into());
-            }
-            super::InputError::ValidationErrors(err) => {
-                let errs = err
-                    .into_iter()
-                    .map(|e| format!("- {}", e))
-                    .collect::<Vec<String>>()
-                    .join("\n");
+    let inputs = if schema_json.is_null() {
+        Value::Object(Map::new())
+    } else {
+        match handle_inputs(schema_json) {
+            Ok(data) => data,
+            Err(e) => match e {
+                super::InputError::DialoguerError(err) => {
+                    return Err(format!("Dialoguer error: {}", err).into());
+                }
+                super::InputError::ValidationErrors(err) => {
+                    let errs = err
+                        .into_iter()
+                        .map(|e| format!("- {}", e))
+                        .collect::<Vec<String>>()
+                        .join("\n");
 
-                return Err(format!("Validation errors: {}", errs).into());
-            }
-        },
+                    return Err(format!("Validation errors: {}", errs).into());
+                }
+            },
+        }
     };
 
-    // Copy files
     if let Err(err) = fs::create_dir_all(destination) {
         return Err(format!("Failed to create destination directory {}", err).into());
     }
 
-    let src = Path::new(src);
-    let dest = Path::new(destination);
+    let src = fs::canonicalize(src)?;
+    let dest = fs::canonicalize(destination)?;
+    let excluded_root = dest
+        .starts_with(&src)
+        .then_some(dest.as_path())
+        .filter(|path| *path != src.as_path());
 
-    let total_files = count_dir_files(src).unwrap_or(0);
+    let total_files = count_dir_files_except(&src, excluded_root).unwrap_or(0);
 
     let pb = ProgressBar::new(total_files);
 
-    if let Err(err) = render_template_dir(src, dest, &inputs, &pb) {
+    if let Err(err) = render_template_dir(&src, &dest, &inputs, &pb, excluded_root) {
         return Err(format!("Failed to copy files: {}", err).into());
     }
 
@@ -169,7 +177,12 @@ pub fn generate_schematic(
             return render_schematic(&schema_json, &local.path, destination);
         }
         Schematic::Remote(remote) => {
-            let tmp_path = std::env::temp_dir().join("schematics_tmp");
+            let unique_suffix = SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos();
+            let tmp_path = std::env::temp_dir().join(format!(
+                "schematics_tmp_{}_{}",
+                std::process::id(),
+                unique_suffix
+            ));
 
             let render_result = remote_render_schematic(remote, &tmp_path, destination);
 

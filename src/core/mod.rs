@@ -31,15 +31,21 @@ pub fn read_schema(path: &Path) -> Value {
     schema_json
 }
 
-pub fn count_dir_files(src: &Path) -> std::io::Result<u64> {
+pub fn count_dir_files_except(src: &Path, excluded_root: Option<&Path>) -> std::io::Result<u64> {
     let mut count = 0;
 
     for entry in fs::read_dir(src)? {
         let entry = entry?;
+        let entry_path = entry.path();
+
+        if excluded_root.is_some_and(|excluded_root| entry_path.starts_with(excluded_root)) {
+            continue;
+        }
+
         let file_type = entry.file_type()?;
 
         if file_type.is_dir() {
-            count += count_dir_files(&entry.path())?;
+            count += count_dir_files_except(&entry_path, excluded_root)?;
         } else {
             count += 1;
         }

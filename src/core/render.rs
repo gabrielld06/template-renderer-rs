@@ -19,6 +19,7 @@ pub fn render_template_dir(
     dst: &Path,
     context: &Value,
     pb: &ProgressBar,
+    excluded_root: Option<&Path>,
 ) -> std::io::Result<()> {
     if src.ends_with(".git") {
         return Ok(());
@@ -28,19 +29,25 @@ pub fn render_template_dir(
 
     for entry in fs::read_dir(src)? {
         let entry = entry?;
+        let entry_path = entry.path();
+
+        if excluded_root.is_some_and(|excluded_root| entry_path.starts_with(excluded_root)) {
+            continue;
+        }
+
         let file_type = entry.file_type()?;
 
         let file_name = render_file(entry.file_name().to_str().unwrap_or_default(), context);
 
         let dest_path = dst.join(file_name.clone());
         if file_type.is_dir() {
-            render_template_dir(&entry.path(), &dest_path, context, pb)?;
+            render_template_dir(&entry_path, &dest_path, context, pb, excluded_root)?;
         } else {
             if file_name == "schema.json" {
                 continue;
             }
 
-            let file_content = fs::read_to_string(entry.path())?;
+            let file_content = fs::read_to_string(entry_path)?;
             let rendered_content = render_file(&file_content, context);
             fs::write(&dest_path, rendered_content)?;
 

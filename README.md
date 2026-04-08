@@ -226,9 +226,3 @@ will prompt for those values and write rendered files under `./demo`.
 - [`src/core/input.rs`](./src/core/input.rs): prompt and schema handling
 - [`src/core/render.rs`](./src/core/render.rs): recursive template rendering
 - [`src/core/schematic.rs`](./src/core/schematic.rs): schematic types and list table formatting
-
-## Current Notes
-
-- Remote generation clones the repository and renders from the cloned root
-- The `branch` field is accepted in config and CLI, but the current implementation clones without checking out the requested branch
-- The checked-in `config.toml` is a repository example; the application itself reads from the user config directory

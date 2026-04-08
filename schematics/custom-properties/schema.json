@@ -1,0 +1,25 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Custom Schema Properties Example",
+    "type": "object",
+    "properties": {
+        "componentName": {
+            "type": "string",
+            "default": "user profile",
+            "x-prompt": "What should the component be called?",
+            "x-casing": ["camelCase", "PascalCase", "snake_case", "kebab-case", "UPPER_CASE"]
+        },
+        "greetingTarget": {
+            "type": "string",
+            "default": "team",
+            "x-prompt": "Who should the generated module greet?"
+        },
+        "moduleFormat": {
+            "type": "string",
+            "enum": ["esm", "commonjs"],
+            "default": "esm",
+            "x-prompt": "Which module format should be used?"
+        }
+    },
+    "required": ["componentName", "greetingTarget", "moduleFormat"]
+}

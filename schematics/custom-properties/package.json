@@ -1,0 +1,10 @@
+{
+  "name": "{{componentName_snake_case}}-example",
+  "version": "1.0.0",
+  "private": true,
+  "type": "{{moduleFormat}}",
+  "main": "{{componentName_snake_case}}.js",
+  "scripts": {
+    "start": "node {{componentName_snake_case}}.js"
+  }
+}

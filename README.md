@@ -193,9 +193,12 @@ If a file is named `{{file}}.js` and the answer for `file` is `utils`, the outpu
 
 ## Example
 
-This repository includes a sample schematic in [`schematics/example`](./schematics/example).
+This repository includes sample schematics in:
 
-Its schema asks for:
+- [`schematics/example`](./schematics/example)
+- [`schematics/custom-properties`](./schematics/custom-properties)
+
+The `example` schema asks for:
 
 - `projectName`
 - `helloTo`
@@ -216,6 +219,10 @@ template-renderer generate example --destination ./demo
 ```
 
 will prompt for those values and write rendered files under `./demo`.
+
+The `custom-properties` example shows how `x-prompt` changes the question text and how
+`x-casing` exposes derived values such as `{{componentName_camelCase}}`, `{{componentName_PascalCase}}`,
+`{{componentName_snake_case}}`, `{{componentName_kebab-case}}` and `{{componentName_UPPER_CASE}}`.
 
 ## Project Structure
 
